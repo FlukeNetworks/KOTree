@@ -35,12 +35,12 @@
 #import "KOTreeTableViewCell.h"
 #import <QuartzCore/QuartzCore.h>
 
-#define KOCOLOR_FILES_TITLE [UIColor colorWithRed:0.4 green:0.357 blue:0.325 alpha:1] /*#665b53*/
-#define KOCOLOR_FILES_TITLE_SHADOW [UIColor colorWithRed:1 green:1 blue:1 alpha:1] /*#ffffff*/
-#define KOCOLOR_FILES_COUNTER [UIColor colorWithRed:0.608 green:0.376 blue:0.251 alpha:1] /*#9b6040*/
-#define KOCOLOR_FILES_COUNTER_SHADOW [UIColor colorWithRed:1 green:1 blue:1 alpha:0.35] /*#ffffff*/
+#define KOCOLOR_FILES_TITLE [UIColor colorWithRed:1 green:1 blue:1 alpha:1] /*#ffffff*/
+#define KOCOLOR_FILES_TITLE_SHADOW [UIColor colorWithRed:0 green:0 blue:0 alpha:0.9] /*#000000*/
+#define KOCOLOR_FILES_COUNTER [UIColor colorWithRed:0 green:0 blue:0 alpha:0.80] /*#000000*/
+#define KOCOLOR_FILES_COUNTER_SHADOW [UIColor colorWithRed:1 green:1 blue:1 alpha:0.5] /*#ffffff*/
 #define KOFONT_FILES_TITLE [UIFont fontWithName:@"HelveticaNeue" size:24.0f]
-#define KOFONT_FILES_COUNTER [UIFont fontWithName:@"HelveticaNeue-Bold" size:12.0f]
+#define KOFONT_FILES_COUNTER [UIFont fontWithName:@"HelveticaNeue-Bold" size:14.0f]
 
 @implementation KOTreeTableViewCell
 
@@ -56,41 +56,41 @@
     if (self) {
         // Initialization code
 		
-		backgroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"copymove-cell-bg"]];
+		backgroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"filter_row"]];
 		[backgroundImageView setContentMode:UIViewContentModeTopRight];
 		
 		[self setBackgroundView:backgroundImageView];
 		[self setSelectionStyle:UITableViewCellSelectionStyleNone];
 		
 		iconButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[iconButton setFrame:CGRectMake(0, 0, 100, 65)];
+		[iconButton setFrame:CGRectMake(0, 0, 44, 44)];
 		[iconButton setAdjustsImageWhenHighlighted:NO];
 		[iconButton addTarget:self action:@selector(iconButtonAction:) forControlEvents:UIControlEventTouchUpInside];
-		[iconButton setImage:[UIImage imageNamed:@"item-icon-folder"] forState:UIControlStateNormal];
-		[iconButton setImage:[UIImage imageNamed:@"item-icon-folder-selected"] forState:UIControlStateSelected];
-		[iconButton setImage:[UIImage imageNamed:@"item-icon-folder-selected"] forState:UIControlStateHighlighted];
+		[iconButton setImage:[UIImage imageNamed:@"filter_check"] forState:UIControlStateNormal];
+		[iconButton setImage:[UIImage imageNamed:@"filter_check_active"] forState:UIControlStateSelected];
+		[iconButton setImage:[UIImage imageNamed:@"filter_check_active"] forState:UIControlStateHighlighted];
 		
 		[self.contentView addSubview:iconButton];
 		
 		titleTextField = [[UITextField alloc] init];
+        [titleTextField setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
 		[titleTextField setFont:KOFONT_FILES_TITLE];
 		[titleTextField setTextColor:KOCOLOR_FILES_TITLE];
 		[titleTextField.layer setShadowColor:KOCOLOR_FILES_TITLE_SHADOW.CGColor];
-		[titleTextField.layer setShadowOffset:CGSizeMake(0, 1)];
+		[titleTextField.layer setShadowOffset:CGSizeMake(0, -1)];
 		[titleTextField.layer setShadowOpacity:1.0f];
 		[titleTextField.layer setShadowRadius:0.0f];
 		
 		[titleTextField setUserInteractionEnabled:NO];
 		[titleTextField setBackgroundColor:[UIColor clearColor]];
-		[titleTextField sizeToFit];
-		[titleTextField setFrame:CGRectMake(108, 17, titleTextField.frame.size.width, titleTextField.frame.size.height)];
+		[titleTextField setFrame:CGRectMake(44, 4, self.frame.size.width - 148, 36)];
 		[self.contentView addSubview:titleTextField];
 		
 		[self.layer setMasksToBounds:YES];
 		
-		countLabel = [[UILabel alloc] initWithFrame:CGRectMake(686, 28, 47, 28)];
+		countLabel = [[UILabel alloc] initWithFrame:CGRectMake(666, 28, 48, 28)];
 		[countLabel setAutoresizingMask:UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin];
-		[countLabel setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"item-counter"]]];
+		[countLabel setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"filter_counter_bg"]]];
 		[countLabel setTextAlignment:UITextAlignmentCenter];
 		[countLabel setLineBreakMode:UILineBreakModeMiddleTruncation];
 		[countLabel setFont:KOFONT_FILES_COUNTER];
@@ -100,9 +100,34 @@
 		
 		[self setAccessoryView:countLabel];
 		[self.accessoryView setAutoresizingMask:UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleBottomMargin];
+        [self.accessoryView setFrame:CGRectMake(self.accessoryView.frame.origin.x - 20.0, self.accessoryView.frame.origin.y, self.accessoryView.frame.size.width, self.accessoryView.frame.size.height)];
 		
     }
     return self;
+}
+
+//Shift the accessory view left because of overlaid view
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    
+    UIView* defaultAccessoryView = nil;
+    
+    for (UIView* subview in self.subviews) {
+        if (subview != self.textLabel &&
+            subview != self.detailTextLabel &&
+            subview != self.backgroundView &&
+            subview != self.contentView &&
+            subview != self.selectedBackgroundView &&
+            subview != self.imageView &&
+            subview.frame.origin.x > 0 // Assumption: the checkmark will always have an x position over 0.
+            ) {
+            defaultAccessoryView = subview;
+            break;
+        }
+    }
+    CGRect r = defaultAccessoryView.frame;
+    r.origin.x -= 40.0;
+    defaultAccessoryView.frame = r;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
@@ -116,11 +141,12 @@
 	CGRect rect;
 	
 	rect = iconButton.frame;
-	rect.origin.x = 50 * level;
+	rect.origin.x = 32 * level;
 	iconButton.frame = rect;
 	
 	rect = titleTextField.frame;
-	rect.origin.x = 108 + 50 * level;
+	rect.origin.x = 44 + 32 * level;
+    rect.size.width = (self.frame.size.width - 128) - 32 * level;
 	titleTextField.frame = rect;
 }
 

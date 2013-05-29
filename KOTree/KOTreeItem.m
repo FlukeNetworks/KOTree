@@ -36,7 +36,7 @@
 
 @implementation KOTreeItem
 
-@synthesize base, path;
+@synthesize base, path, title;
 @synthesize numberOfSubitems;
 @synthesize parentSelectingItem;
 @synthesize ancestorSelectingItems;
